@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#087BFF"/><stop offset="1" stop-color="#6500E8"/></linearGradient>
+ <linearGradient id="z" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#12C9FF"/><stop offset="1" stop-color="#A100FF"/></linearGradient>
+ <linearGradient id="green" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#B5FF25"/><stop offset="1" stop-color="#21D83B"/></linearGradient>
+</defs>
+<rect width="512" height="512" rx="112" fill="url(#bg)"/>
+<path d="M277 140c105 0 174 65 174 155 0 54-29 98-77 124l16 53-75-39c-13 3-27 5-42 5-104 0-177-62-177-151s73-147 181-147Z" fill="url(#green)"/>
+<path d="M219 84c-104 0-176 64-176 155 0 58 30 104 82 130l-34 65 106-54c9 1 18 2 27 2 107 0 180-61 180-151S331 84 219 84Z" fill="#fff" transform="translate(42 18)"/>
+<path d="m177 186 205-25-104 111 115-12-209 82 103-116-110 14Z" fill="url(#z)" transform="translate(-8 0)"/>
+<g fill="#58D9FF"><rect x="78" y="196" width="88" height="17" rx="8.5"/><rect x="78" y="232" width="108" height="17" rx="8.5"/><rect x="95" y="268" width="53" height="17" rx="8.5"/></g>
+</svg>
