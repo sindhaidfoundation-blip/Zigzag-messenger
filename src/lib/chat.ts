@@ -1,17 +1,3 @@
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-  setDoc,
-  updateDoc,
-  where,
-  type Unsubscribe
-} from "firebase/firestore";
 import { firestore } from "./firebase";
 
 export type ChatMessage = {
@@ -30,30 +16,27 @@ export type Conversation = {
   lastMessage?: string;
 };
 
-function requireFirestore() {
-  if (!firestore) {
-    throw new Error("Firebase is not configured. Add the EXPO_PUBLIC_FIREBASE_* values before using chat.");
-  }
-  return firestore;
-}
+type Unsubscribe = () => void;
 
 export async function createOrOpenConversation(memberIds: string[]) {
-  const db = requireFirestore();
   const uniqueMembers = [...new Set(memberIds)].sort();
   if (uniqueMembers.length < 2) throw new Error("A conversation needs at least two members.");
 
-  // Stable ID avoids creating duplicate one-to-one conversations.
   const conversationId = uniqueMembers.join("_");
-  const conversationRef = doc(db, "conversations", conversationId);
-  const existing = await getDoc(conversationRef);
-  if (!existing.exists()) {
-    await setDoc(conversationRef, {
+  const conversationRef = firestore().collection("conversations").doc(conversationId);
+  const existing = await conversationRef.get();
+
+  if (!existing.exists) {
+    await conversationRef.set({
       memberIds: uniqueMembers,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      createdAt: firestore.FieldValue.serverTimestamp(),
+      updatedAt: firestore.FieldValue.serverTimestamp()
     });
-  } else if (JSON.stringify([...(existing.data().memberIds ?? [])].sort()) !== JSON.stringify(uniqueMembers)) {
-    throw new Error("Conversation ID collision. Choose a different conversation ID strategy.");
+  } else {
+    const currentMembers = [...((existing.data()?.memberIds ?? []) as string[])].sort();
+    if (JSON.stringify(currentMembers) !== JSON.stringify(uniqueMembers)) {
+      throw new Error("Conversation ID collision. Choose a different conversation ID strategy.");
+    }
   }
   return conversationId;
 }
@@ -63,15 +46,14 @@ export function subscribeToMyConversations(
   onChange: (items: Conversation[]) => void,
   onError?: (error: Error) => void
 ): Unsubscribe {
-  const db = requireFirestore();
-  const q = query(
-    collection(db, "conversations"),
-    where("memberIds", "array-contains", userId),
-    orderBy("updatedAt", "desc")
-  );
-  return onSnapshot(q, snapshot => {
-    onChange(snapshot.docs.map(item => ({ id: item.id, ...item.data() } as Conversation)));
-  }, error => onError?.(error));
+  return firestore()
+    .collection("conversations")
+    .where("memberIds", "array-contains", userId)
+    .orderBy("updatedAt", "desc")
+    .onSnapshot(
+      snapshot => onChange(snapshot.docs.map(item => ({ id: item.id, ...item.data() } as Conversation))),
+      error => onError?.(error)
+    );
 }
 
 export function subscribeToMessages(
@@ -79,30 +61,31 @@ export function subscribeToMessages(
   onChange: (items: ChatMessage[]) => void,
   onError?: (error: Error) => void
 ): Unsubscribe {
-  const db = requireFirestore();
-  const q = query(
-    collection(db, "conversations", conversationId, "messages"),
-    orderBy("createdAt", "asc")
-  );
-  return onSnapshot(q, snapshot => {
-    onChange(snapshot.docs.map(item => ({ id: item.id, ...item.data() } as ChatMessage)));
-  }, error => onError?.(error));
+  return firestore()
+    .collection("conversations")
+    .doc(conversationId)
+    .collection("messages")
+    .orderBy("createdAt", "asc")
+    .onSnapshot(
+      snapshot => onChange(snapshot.docs.map(item => ({ id: item.id, ...item.data() } as ChatMessage))),
+      error => onError?.(error)
+    );
 }
 
 export async function sendTextMessage(conversationId: string, senderId: string, text: string) {
-  const db = requireFirestore();
   const cleanText = text.trim();
   if (!cleanText) return;
   if (cleanText.length > 10000) throw new Error("Message is too long.");
 
-  await addDoc(collection(db, "conversations", conversationId, "messages"), {
+  const conversationRef = firestore().collection("conversations").doc(conversationId);
+  await conversationRef.collection("messages").add({
     senderId,
     text: cleanText,
     kind: "text",
-    createdAt: serverTimestamp()
+    createdAt: firestore.FieldValue.serverTimestamp()
   });
-  await updateDoc(doc(db, "conversations", conversationId), {
+  await conversationRef.update({
     lastMessage: cleanText,
-    updatedAt: serverTimestamp()
+    updatedAt: firestore.FieldValue.serverTimestamp()
   });
 }
