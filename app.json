@@ -10,6 +10,6 @@
     "plugins": ["expo-router"],
     "experiments": { "typedRoutes": true },
     "ios": { "supportsTablet": true, "bundleIdentifier": "com.zigzag.messenger" },
-    "android": { "package": "com.zigzag.messenger", "edgeToEdgeEnabled": true }
+    "android": { "package": "com.zigzag.messenger", "googleServicesFile": "./google-services.json", "edgeToEdgeEnabled": true }
   }
 }
