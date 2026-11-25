@@ -44,11 +44,16 @@ export async function createOrOpenConversation(memberIds: string[]) {
   // Stable ID avoids creating duplicate one-to-one conversations.
   const conversationId = uniqueMembers.join("_");
   const conversationRef = doc(db, "conversations", conversationId);
-  await setDoc(conversationRef, {
-    memberIds: uniqueMembers,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  }, { merge: true });
+  const existing = await getDoc(conversationRef);
+  if (!existing.exists()) {
+    await setDoc(conversationRef, {
+      memberIds: uniqueMembers,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+  } else if (JSON.stringify([...(existing.data().memberIds ?? [])].sort()) !== JSON.stringify(uniqueMembers)) {
+    throw new Error("Conversation ID collision. Choose a different conversation ID strategy.");
+  }
   return conversationId;
 }
 
