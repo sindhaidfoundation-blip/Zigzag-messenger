@@ -1,8 +1,17 @@
+import { useEffect } from "react";
 import { router } from "expo-router";
 import { View, Text, StyleSheet, Pressable } from "react-native";
+import auth from "@react-native-firebase/auth";
 import { colors } from "../src/theme";
 
 export default function WelcomeScreen() {
+  useEffect(() => {
+    const unsubscribe = auth().onAuthStateChanged(user => {
+      if (user) router.replace("/(tabs)");
+    });
+    return unsubscribe;
+  }, []);
+
   return <View style={s.page}>
     <View style={s.art}>
       <View style={[s.orb, s.orbOne]} /><View style={[s.orb, s.orbTwo]} />
