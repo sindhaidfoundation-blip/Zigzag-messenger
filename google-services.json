@@ -1,0 +1,28 @@
+{
+  "project_info": {
+    "project_number": "526015877871",
+    "project_id": "zigzag-messenger-624a3",
+    "storage_bucket": "zigzag-messenger-624a3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:526015877871:android:b0befa08054c537ad9011a",
+        "android_client_info": {
+          "package_name": "com.zigzag.messenger"
+        }
+      },
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5pOIyPmVcvb7arUVYGXGGqAUnm1S3jE0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
